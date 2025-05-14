@@ -24,7 +24,11 @@ class FiaService {
   }
 
   Future<void> requestOtp(String phone) async {
-    lastPromise = await _fia.otp().login(phone);
+    final promise = await _fia.otp().login(phone);
+    if (promise.hasException) {
+      throw promise.exception!;
+    }
+    lastPromise = promise;
     this.phone = phone;
   }
 
