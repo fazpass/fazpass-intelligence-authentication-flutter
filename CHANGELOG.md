@@ -1,3 +1,7 @@
+## 1.0.0
+
+* Updated to match native FIA version 1.1.0
+
 ## 0.0.2
 
 * Platform iOS finished.
