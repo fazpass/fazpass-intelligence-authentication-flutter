@@ -1,6 +1,6 @@
 name: fia
 description: "Fazpass Intelligence Authentication, written in Flutter."
-version: 0.0.2
+version: 1.0.0
 homepage: https://fazpass.com
 repository: https://github.com/fazpass/fazpass-intelligence-authentication-flutter
 

@@ -14,20 +14,32 @@ class OtpPromise {
       exception = obj['exception'],
       digitCount = obj['digitCount'] {
     switch (obj['authType']) {
-      case 'Message':
-        authType = OtpAuthType.message;
+      case 'SMS':
+        authType = OtpAuthType.sms;
+        break;
+      case 'Whatsapp':
+        authType = OtpAuthType.whatsapp;
         break;
       case 'Miscall':
         authType = OtpAuthType.miscall;
         break;
-      case 'He':
+      case 'HE':
         authType = OtpAuthType.he;
         break;
       case 'FIA':
         authType = OtpAuthType.fia;
         break;
+      case 'MagicOtp':
+        authType = OtpAuthType.magicOtp;
+        break;
+      case 'MagicLink':
+        authType = OtpAuthType.magicLink;
+        break;
+      case 'Voice':
+        authType = OtpAuthType.voice;
+        break;
       default:
-        authType = OtpAuthType.message;
+        authType = OtpAuthType.he;
         break;
     }
   }
@@ -42,6 +54,14 @@ class OtpPromise {
 
   Future<String> listenToMiscall() {
     return FiaPlatform.instance.listenToMiscall(transactionId);
+  }
+
+  Future<void> launchWhatsappForMagicOtp() {
+    return FiaPlatform.instance.launchWhatsappForMagicOtp(transactionId);
+  }
+
+  Future<void> launchWhatsappForMagicLink() {
+    return FiaPlatform.instance.launchWhatsappForMagicLink(transactionId);
   }
 
   /// Clean this object from memory.

@@ -74,6 +74,26 @@ internal class FiaMethodCallHandler: MethodCallHandler {
                 val promise = promises[transactionId]
                 promise?.let { it.listenToMiscall { otp -> result.success(otp) } }
             }
+            "launchWhatsappForMagicOtp" -> {
+                val transactionId = call.argument<String>("transactionId")!!
+                val promise = promises[transactionId]
+                promise?.let {
+                    it.launchWhatsappForMagicOtp(
+                        { err -> result.error(err::class.java.name, err.stackTraceToString(), null) },
+                        { result.success(null) }
+                    )
+                }
+            }
+            "launchWhatsappForMagicLink" -> {
+                val transactionId = call.argument<String>("transactionId")!!
+                val promise = promises[transactionId]
+                promise?.let {
+                    it.launchWhatsappForMagicLink(
+                        { err -> result.error(err::class.java.name, err.stackTraceToString(), null) },
+                        { result.success(null) }
+                    )
+                }
+            }
             "forgetPromise" -> {
                 val transactionId = call.argument<String>("transactionId")!!
                 promises.remove(transactionId)

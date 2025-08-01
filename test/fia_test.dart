@@ -43,6 +43,18 @@ class MockFiaPlatform with MockPlatformInterfaceMixin implements FiaPlatform {
     // TODO: implement validateOtp
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> launchWhatsappForMagicLink(String transactionId) {
+    // TODO: implement launchWhatsappForMagicLink
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> launchWhatsappForMagicOtp(String transactionId) {
+    // TODO: implement launchWhatsappForMagicOtp
+    throw UnimplementedError();
+  }
 }
 
 void main() {

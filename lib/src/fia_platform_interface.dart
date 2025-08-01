@@ -43,6 +43,18 @@ abstract class FiaPlatform extends PlatformInterface {
     throw UnimplementedError('listenToMiscall() has not been implemented.');
   }
 
+  Future<void> launchWhatsappForMagicOtp(String transactionId) {
+    throw UnimplementedError(
+      'launchWhatsappForMagicOtp() has not been implemented.',
+    );
+  }
+
+  Future<void> launchWhatsappForMagicLink(String transactionId) {
+    throw UnimplementedError(
+      'launchWhatsappForMagicLink() has not been implemented.',
+    );
+  }
+
   Future<void> forgetPromise(String transactionId) {
     throw UnimplementedError('forgetPromise() has not been implemented.');
   }

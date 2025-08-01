@@ -27,8 +27,13 @@ class _ValidatePageState extends State<ValidatePage> {
           spacing: 24,
           children: [
             Text('validate otp type: $authType', textAlign: TextAlign.center),
-            if (authType == OtpAuthType.message ||
-                authType == OtpAuthType.miscall)
+            if ([
+              OtpAuthType.sms,
+              OtpAuthType.whatsapp,
+              OtpAuthType.voice,
+              OtpAuthType.magicOtp,
+              OtpAuthType.miscall,
+            ].any((type) => type == authType))
               TextField(
                 controller: _otpController,
                 decoration: const InputDecoration(

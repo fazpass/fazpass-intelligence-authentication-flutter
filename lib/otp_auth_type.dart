@@ -1,1 +1,1 @@
-enum OtpAuthType { message, miscall, he, fia }
+enum OtpAuthType { sms, whatsapp, miscall, he, fia, magicOtp, magicLink, voice }

@@ -25,7 +25,7 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    namespace = "com.fazpass.fia"
+    namespace = "com.fazpass.fia_flutter"
 
     compileSdk = 35
 
@@ -44,13 +44,13 @@ android {
     }
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
     }
 
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
-        implementation("com.fazpass:fia:1.0.2")
+        implementation("com.fazpass:fia:1.1.1")
     }
 
     testOptions {

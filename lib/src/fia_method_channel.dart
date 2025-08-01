@@ -50,6 +50,20 @@ class MethodChannelFia extends FiaPlatform {
   }
 
   @override
+  Future<void> launchWhatsappForMagicOtp(String transactionId) {
+    return methodChannel.invokeMethod<void>('launchWhatsappForMagicOtp', {
+      'transactionId': transactionId,
+    });
+  }
+
+  @override
+  Future<void> launchWhatsappForMagicLink(String transactionId) {
+    return methodChannel.invokeMethod<void>('launchWhatsappForMagicLink', {
+      'transactionId': transactionId,
+    });
+  }
+
+  @override
   Future<void> forgetPromise(String transactionId) {
     return methodChannel.invokeMethod<void>('forgetPromise', {
       'transactionId': transactionId,
