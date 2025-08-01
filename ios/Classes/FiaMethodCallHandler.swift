@@ -30,43 +30,35 @@ class FiaMethodCallHandler {
             let phone = arguments["phone"] as! String
             
             let promising: (OtpPromise) -> Void = { promise in
-              self.promises[promise.transactionId] = promise
-              
-              var obj = [:]
-              obj["transactionId"] = promise.transactionId
-              obj["hasException"] = promise.hasError
-              
-              switch (promise.authType) {
-              case .Message:
-                obj["authType"] = "Message"
-                break
-              case .Miscall:
-                obj["authType"] = "Miscall"
-                break
-              case .HE:
-                obj["authType"] = "He"
-                break
-              case .FIA:
-                obj["authType"] = "FIA"
-                break
-              @unknown default:
-                obj["authType"] = "Message"
-                break
-              }
-
-              if (promise.hasError) {
+                self.promises[promise.transactionId] = promise
+                
+                var obj = [:]
+                obj["transactionId"] = promise.transactionId
+                obj["hasException"] = promise.hasError
                 obj["exception"] = promise.error.localizedDescription
-              } else {
-                obj["exception"] = nil
-              }
-              
-              if (promise.authType == OtpAuthType.Message
-                || promise.authType == OtpAuthType.Miscall) {
                 obj["digitCount"] = promise.digitCount
-              } else {
-                obj["digitCount"] = nil
-              }
-              result(obj)
+              
+                switch (promise.authType) {
+                case .SMS:
+                    obj["authType"] = "SMS"
+                case .Whatsapp:
+                    obj["authType"] = "Whatsapp"
+                case .Miscall:
+                    obj["authType"] = "Miscall"
+                case .HE:
+                    obj["authType"] = "HE"
+                case .FIA:
+                    obj["authType"] = "FIA"
+                case .MagicOtp:
+                    obj["authType"] = "MagicOtp"
+                case .MagicLink:
+                    obj["authType"] = "MagicLink"
+                case .Voice:
+                    obj["authType"] = "Voice"
+                @unknown default:
+                    obj["authType"] = "HE"
+                }
+                result(obj)
             }
             
             switch (purpose) {
@@ -127,6 +119,48 @@ class FiaMethodCallHandler {
             )
         case "listenToMiscall":
             result("")
+        case "launchWhatsappForMagicOtp":
+            let transactionId = arguments["transactionId"] as! String
+            
+            guard let promise = promises[transactionId] else {
+                  result(FlutterError(
+                    code: "PromiseNotFound",
+                    message: "No such transaction.",
+                    details: nil
+                  ))
+                  return
+            }
+            promise.launchWhatsappForMagicOtp(
+              { err in
+                  result(FlutterError(
+                    code: "ValidateFailed",
+                    message: err.localizedDescription,
+                    details: nil
+                  ))
+              },
+              { result(nil) }
+            )
+        case "launchWhatsappForMagicLink":
+            let transactionId = arguments["transactionId"] as! String
+            
+            guard let promise = promises[transactionId] else {
+                  result(FlutterError(
+                    code: "PromiseNotFound",
+                    message: "No such transaction.",
+                    details: nil
+                  ))
+                  return
+            }
+            promise.launchWhatsappForMagicLink(
+              { err in
+                  result(FlutterError(
+                    code: "ValidateFailed",
+                    message: err.localizedDescription,
+                    details: nil
+                  ))
+              },
+              { result(nil) }
+            )
         case "forgetPromise":
             let transactionId = arguments["transactionId"] as! String
             

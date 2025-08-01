@@ -1,13 +1,15 @@
 PODS:
-  - DeviceIntelligenceIOS (0.0.6):
+  - DeviceIntelligenceIOS (1.0.1):
     - DeviceKit
+    - PLCrashReporter
   - DeviceKit (5.6.0)
   - fia (0.0.1):
-    - FiaIOS
+    - FiaIOS (~> 1.1)
     - Flutter
-  - FiaIOS (0.0.6):
+  - FiaIOS (1.1.0):
     - DeviceIntelligenceIOS
   - Flutter (1.0.0)
+  - PLCrashReporter (1.12.0)
 
 DEPENDENCIES:
   - fia (from `.symlinks/plugins/fia/ios`)
@@ -18,6 +20,7 @@ SPEC REPOS:
     - DeviceIntelligenceIOS
     - DeviceKit
     - FiaIOS
+    - PLCrashReporter
 
 EXTERNAL SOURCES:
   fia:
@@ -26,11 +29,12 @@ EXTERNAL SOURCES:
     :path: Flutter
 
 SPEC CHECKSUMS:
-  DeviceIntelligenceIOS: 7f9fd412455ebc8446e3e314c1fa7443967d9d5c
+  DeviceIntelligenceIOS: c7f7d36116ff3e00511766a7ee57824c8c990a05
   DeviceKit: 9f2e0b68984a384f864b0f4e40a54bae43636bd8
-  fia: 8e62725daa6e0e146c4f8647a4ffb622a6b06a07
-  FiaIOS: 199e0e2d8c0b1c9b19cfb28eafb2cf600fb1960b
+  fia: 36483c15e323eb5843203225b3ef60bd5ff67c3c
+  FiaIOS: fe6b1cc3ddb4abe7ab95b641e4628e4ce6896d53
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  PLCrashReporter: db59ef96fa3d25f3650040d02ec2798cffee75f2
 
 PODFILE CHECKSUM: e30f02f9d1c72c47bb6344a0a748c9d268180865
 
