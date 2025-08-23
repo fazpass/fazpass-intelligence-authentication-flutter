@@ -26,9 +26,6 @@ class OtpPromise {
       case 'HE':
         authType = OtpAuthType.he;
         break;
-      case 'FIA':
-        authType = OtpAuthType.fia;
-        break;
       case 'MagicOtp':
         authType = OtpAuthType.magicOtp;
         break;

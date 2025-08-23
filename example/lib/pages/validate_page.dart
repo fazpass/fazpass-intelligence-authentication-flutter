@@ -47,9 +47,6 @@ class _ValidatePageState extends State<ValidatePage> {
                   case OtpAuthType.he:
                     _validateHe();
                     break;
-                  case OtpAuthType.fia:
-                    _validateFia();
-                    break;
                   default:
                     _validateOtp();
                     break;
@@ -61,11 +58,6 @@ class _ValidatePageState extends State<ValidatePage> {
         ),
       ),
     );
-  }
-
-  void _validateFia() async {
-    if (!mounted) return;
-    Navigator.pushNamed(context, '/home');
   }
 
   void _validateOtp() async {

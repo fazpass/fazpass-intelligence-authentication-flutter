@@ -54,7 +54,7 @@ internal class FiaMethodCallHandler: MethodCallHandler {
                 promise?.let {
                     it.validate(
                         otp,
-                        { err -> result.error(err::class.java.name, err.stackTraceToString(), null) },
+                        { err -> result.error(err::class.java.name, err.message, null) },
                         { result.success(null) }
                     )
                 }
@@ -64,7 +64,7 @@ internal class FiaMethodCallHandler: MethodCallHandler {
                 val promise = promises[transactionId]
                 promise?.let {
                     it.validateHE(
-                        { err -> result.error(err::class.java.name, err.stackTraceToString(), null) },
+                        { err -> result.error(err::class.java.name, err.message, null) },
                         { result.success(null) }
                     )
                 }
@@ -79,7 +79,7 @@ internal class FiaMethodCallHandler: MethodCallHandler {
                 val promise = promises[transactionId]
                 promise?.let {
                     it.launchWhatsappForMagicOtp(
-                        { err -> result.error(err::class.java.name, err.stackTraceToString(), null) },
+                        { err -> result.error(err::class.java.name, err.message, null) },
                         { result.success(null) }
                     )
                 }
@@ -89,7 +89,7 @@ internal class FiaMethodCallHandler: MethodCallHandler {
                 val promise = promises[transactionId]
                 promise?.let {
                     it.launchWhatsappForMagicLink(
-                        { err -> result.error(err::class.java.name, err.stackTraceToString(), null) },
+                        { err -> result.error(err::class.java.name, err.message, null) },
                         { result.success(null) }
                     )
                 }

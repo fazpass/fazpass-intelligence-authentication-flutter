@@ -11,20 +11,18 @@ class FiaService {
     return _instance;
   }
 
-  static final String MERCHANT_KEY =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjo5NzcwfQ.RTOdNJK-P3iKnVOP8m_xnCet7OcuG5GETdYlPM0FIpo';
-  static final String MERCHANT_APP_ID = '2e814399-6120-4a5e-93e2-562a903d480d';
+  final config = _FiaConfig.production;
 
   final _fia = Fia();
   OtpPromise? lastPromise;
   String? phone;
 
   void initialize() {
-    _fia.initialize(MERCHANT_KEY, MERCHANT_APP_ID);
+    _fia.initialize(config.merchantKey, config.merchantAppId);
   }
 
   Future<void> requestOtp(String phone) async {
-    final promise = await _fia.otp().login(phone);
+    final promise = await _fia.otp().register(phone);
     if (promise.hasException) {
       throw promise.exception!;
     }
@@ -53,7 +51,7 @@ class FiaService {
       ),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': MERCHANT_KEY,
+        'Authorization': config.merchantKey,
       },
     );
 
@@ -64,4 +62,16 @@ class FiaService {
     }
     return data['is_verified'];
   }
+}
+
+enum _FiaConfig {
+  production(
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjo5NzcwfQ.RTOdNJK-P3iKnVOP8m_xnCet7OcuG5GETdYlPM0FIpo',
+    '2e814399-6120-4a5e-93e2-562a903d480d',
+  );
+
+  final String merchantKey;
+  final String merchantAppId;
+
+  const _FiaConfig(this.merchantKey, this.merchantAppId);
 }
