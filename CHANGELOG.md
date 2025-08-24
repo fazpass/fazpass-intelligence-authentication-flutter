@@ -1,3 +1,9 @@
+# Changelog
+
+## 1.0.1
+
+* Removed channel FIA.
+
 ## 1.0.0
 
 * Updated to match native FIA version 1.1.0
