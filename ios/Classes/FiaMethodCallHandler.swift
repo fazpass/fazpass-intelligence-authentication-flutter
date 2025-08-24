@@ -47,8 +47,6 @@ class FiaMethodCallHandler {
                     obj["authType"] = "Miscall"
                 case .HE:
                     obj["authType"] = "HE"
-                case .FIA:
-                    obj["authType"] = "FIA"
                 case .MagicOtp:
                     obj["authType"] = "MagicOtp"
                 case .MagicLink:
