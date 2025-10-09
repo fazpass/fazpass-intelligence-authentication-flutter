@@ -15,4 +15,35 @@ class Fia {
   OtpSettings otp() {
     return OtpSettings();
   }
+
+  /// Setup additional pro-feature settings for requesting otp.
+  Future<void> setFeatures({
+    bool withVpn=false,
+    bool withLocation=false,
+    bool withBiometricPopup=false,
+    bool withBiometricLevelHigh=false,
+    bool withSimNumbersAndOperators=false,
+    bool withOtpSpammingFunction=false,
+    bool withAppTamperingFunction=false,
+    bool withSuspiciousAppFunction=false,
+    bool withPromoAbuseFunction=false,
+    List<String> promoIds=const [],
+    bool withAccountTakeoverFunction=false,
+    String userIdentifier='',
+  }) {
+    return FiaPlatform.instance.setFeatures(
+      withVpn,
+      withLocation,
+      withBiometricPopup,
+      withBiometricLevelHigh,
+      withSimNumbersAndOperators,
+      withOtpSpammingFunction,
+      withAppTamperingFunction,
+      withSuspiciousAppFunction,
+      withPromoAbuseFunction,
+      promoIds,
+      withAccountTakeoverFunction,
+      userIdentifier,
+    );
+  }
 }

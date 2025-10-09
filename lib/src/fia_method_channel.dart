@@ -69,4 +69,22 @@ class MethodChannelFia extends FiaPlatform {
       'transactionId': transactionId,
     });
   }
+
+  @override
+  Future<void> setFeatures(bool withVpn, bool withLocation, bool withBiometricPopup, bool withBiometricLevelHigh, bool withSimNumbersAndOperators, bool withOtpSpammingFunction, bool withAppTamperingFunction, bool withSuspiciousAppFunction, bool withPromoAbuseFunction, List<String> promoIds, bool withAccountTakeoverFunction, String userIdentifier) {
+    return methodChannel.invokeMethod<void>('setFeatures', {
+      'withVpn': withVpn,
+      'withLocation': withLocation,
+      'withBiometricPopup': withBiometricPopup,
+      'withBiometricLevelHigh': withBiometricLevelHigh,
+      'withSimNumbersAndOperators': withSimNumbersAndOperators,
+      'withOtpSpammingFunction': withOtpSpammingFunction,
+      'withAppTamperingFunction': withAppTamperingFunction,
+      'withSuspiciousAppFunction': withSuspiciousAppFunction,
+      'withPromoAbuseFunction': withPromoAbuseFunction,
+      'promoIds': promoIds,
+      'withAccountTakeoverFunction': withAccountTakeoverFunction,
+      'userIdentifier': userIdentifier,
+    });
+  }
 }

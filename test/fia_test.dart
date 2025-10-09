@@ -55,6 +55,12 @@ class MockFiaPlatform with MockPlatformInterfaceMixin implements FiaPlatform {
     // TODO: implement launchWhatsappForMagicOtp
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> setFeatures(bool withVpn, bool withLocation, bool withBiometricPopup, bool withBiometricLevelHigh, bool withSimNumbersAndOperators, bool withOtpSpammingFunction, bool withAppTamperingFunction, bool withSuspiciousAppFunction, bool withPromoAbuseFunction, List<String> promoIds, bool withAccountTakeoverFunction, String userIdentifier) {
+    // TODO: implement setFeatures
+    throw UnimplementedError();
+  }
 }
 
 void main() {

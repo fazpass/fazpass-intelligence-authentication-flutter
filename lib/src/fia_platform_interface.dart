@@ -58,4 +58,21 @@ abstract class FiaPlatform extends PlatformInterface {
   Future<void> forgetPromise(String transactionId) {
     throw UnimplementedError('forgetPromise() has not been implemented.');
   }
+
+  Future<void> setFeatures(
+    bool withVpn,
+    bool withLocation,
+    bool withBiometricPopup,
+    bool withBiometricLevelHigh,
+    bool withSimNumbersAndOperators,
+    bool withOtpSpammingFunction,
+    bool withAppTamperingFunction,
+    bool withSuspiciousAppFunction,
+    bool withPromoAbuseFunction,
+    List<String> promoIds,
+    bool withAccountTakeoverFunction,
+    String userIdentifier,
+  ) {
+    throw UnimplementedError('setFeatures() has not been implemented.');
+  }
 }

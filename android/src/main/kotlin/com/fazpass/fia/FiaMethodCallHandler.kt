@@ -1,5 +1,6 @@
 package com.fazpass.fia
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import com.fazpass.fia.objects.OtpPromise
 import io.flutter.plugin.common.MethodCall
@@ -15,6 +16,7 @@ internal class FiaMethodCallHandler: MethodCallHandler {
     private val promises = hashMapOf<TransactionId, OtpPromise>()
     var activity: Activity? = null
 
+    @SuppressLint("MissingPermission")
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         val currentActivity = activity
         if (currentActivity == null) {
@@ -97,6 +99,33 @@ internal class FiaMethodCallHandler: MethodCallHandler {
             "forgetPromise" -> {
                 val transactionId = call.argument<String>("transactionId")!!
                 promises.remove(transactionId)
+                result.success(null)
+            }
+            "setFeatures" -> {
+                val withVpn = call.argument<Boolean>("withVpn") ?: false
+                val withLocation = call.argument<Boolean>("withLocation") ?: false
+                val withBiometricPopup = call.argument<Boolean>("withBiometricPopup") ?: false
+                val withBiometricLevelHigh = call.argument<Boolean>("withBiometricLevelHigh") ?: false
+                val withSimNumbersAndOperators = call.argument<Boolean>("withSimNumbersAndOperators") ?: false
+                val withOtpSpammingFunction = call.argument<Boolean>("withVpn") ?: false
+                val withAppTamperingFunction = call.argument<Boolean>("withAppTamperingFunction") ?: false
+                val withSuspiciousAppFunction = call.argument<Boolean>("withSuspiciousAppFunction") ?: false
+                val withPromoAbuseFunction = call.argument<Boolean>("withPromoAbuseFunction") ?: false
+                val promoIds = call.argument<List<String>>("promoIds") ?: listOf()
+                val withAccountTakeoverFunction = call.argument<Boolean>("withAccountTakeoverFunction") ?: false
+                val userIdentifier = call.argument<String>("userIdentifier") ?: ""
+                fia.setFeatures { it
+                    .withVpn(withVpn)
+                    .withLocation(withLocation)
+                    .withBiometricPopup(withBiometricPopup)
+                    .withBiometricLevelHigh(withBiometricLevelHigh)
+                    .withSimNumbersAndOperators(withSimNumbersAndOperators)
+                    .withOtpSpammingFunction(withOtpSpammingFunction)
+                    .withAppTamperingFunction(withAppTamperingFunction)
+                    .withSuspiciousAppFunction(withSuspiciousAppFunction)
+                    .withPromoAbuseFunction(promoIds = promoIds.toTypedArray(), withPromoAbuseFunction)
+                    .withAccountTakeoverFunction(userIdentifier, withAccountTakeoverFunction)
+                }
                 result.success(null)
             }
             else -> result.notImplemented()
