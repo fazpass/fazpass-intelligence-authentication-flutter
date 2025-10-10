@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+* Enabled pro-feature configuration for OTP request.
+
 ## 1.0.1
 
 * Removed channel FIA.
