@@ -164,6 +164,32 @@ class FiaMethodCallHandler {
             
             promises.removeValue(forKey: transactionId)
             result(nil)
+        case "setFeatures":
+            let withVpn = arguments["withVpn"] as? Bool ?? false
+            let withLocation = arguments["withLocation"] as? Bool ?? false
+            let withBiometricPopup = arguments["withBiometricPopup"] as? Bool ?? false
+            let withBiometricLevelHigh = arguments["withBiometricLevelHigh"] as? Bool ?? false
+            let withSimNumbersAndOperators = arguments["withSimNumbersAndOperators"] as? Bool ?? false
+            let withOtpSpammingFunction = arguments["withVpn"] as? Bool ?? false
+            let withAppTamperingFunction = arguments["withAppTamperingFunction"] as? Bool ?? false
+            let withSuspiciousAppFunction = arguments["withSuspiciousAppFunction"] as? Bool ?? false
+            let withPromoAbuseFunction = arguments["withPromoAbuseFunction"] as? Bool ?? false
+            let promoIds = arguments["promoIds"] as? [String] ?? []
+            let withAccountTakeoverFunction = arguments["withAccountTakeoverFunction"] as? Bool ?? false
+            let userIdentifier = arguments["userIdentifier"] as? String ?? ""
+            fia.setFeatures { $0
+                //.withVpn(withVpn)
+                .withLocation(withLocation)
+                .withBiometricPopup(withBiometricPopup)
+                .withBiometricLevelHigh(withBiometricLevelHigh)
+                //.withSimNumbersAndOperators(withSimNumbersAndOperators)
+                .withOtpSpammingFunction(withOtpSpammingFunction)
+                //.withAppTamperingFunction(withAppTamperingFunction)
+                //.withSuspiciousAppFunction(withSuspiciousAppFunction)
+                //.withPromoAbuseFunction(promoIds = promoIds.toTypedArray(), withPromoAbuseFunction)
+                .withAccountTakeoverFunction(userIdentifier, withAccountTakeoverFunction)
+            }
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
