@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+* Fixed logging error.
+
 ## 1.0.2
 
 * Enabled pro-feature configuration for OTP request.
