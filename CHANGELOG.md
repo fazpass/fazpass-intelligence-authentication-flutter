@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+* Security patch update
+* ios: Fixed error message
+* ios: Updated initialize function
+
 ## 1.0.3
 
 * Fixed logging error.
