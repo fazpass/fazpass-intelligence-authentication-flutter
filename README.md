@@ -33,7 +33,7 @@ import 'package:fia/fia.dart';
 final fia = Fia();
 
 // initialize
-fia.initialize("MERCHANT_KEY", "MERCHANT_APP_ID");
+fia.initialize("MERCHANT_KEY", "MERCHANT_APP_ID", "IOS_GROUP_ID");
 
 // request OTP with login purpose
 OtpPromise otpPromise = await fia.otp().login("PHONE");
@@ -45,7 +45,10 @@ if (otpPromise.hasException) {
 
 // check OTP authentication type
 switch (otpPromise.authType) {
-    case OtpAuthType.message:
+    case OtpAuthType.sms:
+        // on message...
+        break;
+    case OtpAuthType.whatsapp:
         // on message...
         break;
     case OtpAuthType.miscall:
@@ -54,7 +57,13 @@ switch (otpPromise.authType) {
     case OtpAuthType.he:
         // on He...
         break;
-    case OtpAuthType.fia:
+    case OtpAuthType.magicOtp:
+        // on FIA...
+        break;
+    case OtpAuthType.magicLink:
+        // on FIA...
+        break;
+    case OtpAuthType.voice:
         // on FIA...
         break;
 };
