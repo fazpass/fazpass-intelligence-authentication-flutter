@@ -15,7 +15,11 @@ class MockFiaPlatform with MockPlatformInterfaceMixin implements FiaPlatform {
   }
 
   @override
-  Future<void> initialize(String merchantKey, String merchantAppId) {
+  Future<void> initialize(
+    String merchantKey,
+    String merchantAppId,
+    String iosGroupId,
+  ) {
     // TODO: implement initialize
     throw UnimplementedError();
   }
@@ -57,7 +61,20 @@ class MockFiaPlatform with MockPlatformInterfaceMixin implements FiaPlatform {
   }
 
   @override
-  Future<void> setFeatures(bool withVpn, bool withLocation, bool withBiometricPopup, bool withBiometricLevelHigh, bool withSimNumbersAndOperators, bool withOtpSpammingFunction, bool withAppTamperingFunction, bool withSuspiciousAppFunction, bool withPromoAbuseFunction, List<String> promoIds, bool withAccountTakeoverFunction, String userIdentifier) {
+  Future<void> setFeatures(
+    bool withVpn,
+    bool withLocation,
+    bool withBiometricPopup,
+    bool withBiometricLevelHigh,
+    bool withSimNumbersAndOperators,
+    bool withOtpSpammingFunction,
+    bool withAppTamperingFunction,
+    bool withSuspiciousAppFunction,
+    bool withPromoAbuseFunction,
+    List<String> promoIds,
+    bool withAccountTakeoverFunction,
+    String userIdentifier,
+  ) {
     // TODO: implement setFeatures
     throw UnimplementedError();
   }

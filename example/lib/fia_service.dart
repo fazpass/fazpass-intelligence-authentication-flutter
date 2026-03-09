@@ -18,7 +18,11 @@ class FiaService {
   String? phone;
 
   void initialize() {
-    _fia.initialize(config.merchantKey, config.merchantAppId);
+    _fia.initialize(
+      config.merchantKey,
+      config.merchantAppId,
+      iosGroupId: 'group.com.fiaExample',
+    );
   }
 
   Future<void> requestOtp(String phone) async {

@@ -22,8 +22,9 @@ class FiaMethodCallHandler {
         case "initialize":
             let merchantKey = arguments["merchantKey"] as! String
             let merchantAppId = arguments["merchantAppId"] as! String
+            let groupId = arguments["iosGroupId"] as! String
             
-            fia.initialize(merchantKey, merchantAppId)
+            fia.initialize(merchantKey, merchantAppId, groupId)
             result(nil)
         case "otp":
             let purpose = arguments["purpose"] as! String

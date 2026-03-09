@@ -10,10 +10,15 @@ class MethodChannelFia extends FiaPlatform {
   final methodChannel = const MethodChannel('fia');
 
   @override
-  Future<void> initialize(String merchantKey, String merchantAppId) {
+  Future<void> initialize(
+    String merchantKey,
+    String merchantAppId,
+    String iosGroupId,
+  ) {
     return methodChannel.invokeMethod<void>('initialize', {
       'merchantKey': merchantKey,
       'merchantAppId': merchantAppId,
+      'iosGroupId': iosGroupId,
     });
   }
 
@@ -71,7 +76,20 @@ class MethodChannelFia extends FiaPlatform {
   }
 
   @override
-  Future<void> setFeatures(bool withVpn, bool withLocation, bool withBiometricPopup, bool withBiometricLevelHigh, bool withSimNumbersAndOperators, bool withOtpSpammingFunction, bool withAppTamperingFunction, bool withSuspiciousAppFunction, bool withPromoAbuseFunction, List<String> promoIds, bool withAccountTakeoverFunction, String userIdentifier) {
+  Future<void> setFeatures(
+    bool withVpn,
+    bool withLocation,
+    bool withBiometricPopup,
+    bool withBiometricLevelHigh,
+    bool withSimNumbersAndOperators,
+    bool withOtpSpammingFunction,
+    bool withAppTamperingFunction,
+    bool withSuspiciousAppFunction,
+    bool withPromoAbuseFunction,
+    List<String> promoIds,
+    bool withAccountTakeoverFunction,
+    String userIdentifier,
+  ) {
     return methodChannel.invokeMethod<void>('setFeatures', {
       'withVpn': withVpn,
       'withLocation': withLocation,

@@ -8,7 +8,7 @@
 	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.keypaz</string>
+		<string>group.com.fiaExample</string>
 	</array>
 </dict>
 </plist>

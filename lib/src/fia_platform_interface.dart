@@ -23,7 +23,11 @@ abstract class FiaPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> initialize(String merchantKey, String merchantAppId) {
+  Future<void> initialize(
+    String merchantKey,
+    String merchantAppId,
+    String iosGroupId,
+  ) {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 

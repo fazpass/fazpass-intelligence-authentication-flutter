@@ -5,8 +5,16 @@ class Fia {
   /// Initialize everything.
   ///
   /// Must be called once before calling any other methods.
-  Future<void> initialize(String merchantKey, String merchantAppId) {
-    return FiaPlatform.instance.initialize(merchantKey, merchantAppId);
+  Future<void> initialize(
+    String merchantKey,
+    String merchantAppId, {
+    String iosGroupId = '',
+  }) {
+    return FiaPlatform.instance.initialize(
+      merchantKey,
+      merchantAppId,
+      iosGroupId,
+    );
   }
 
   /// Creates an instance of `OtpSettings`.
@@ -18,18 +26,18 @@ class Fia {
 
   /// Setup additional pro-feature settings for requesting otp.
   Future<void> setFeatures({
-    bool withVpn=false,
-    bool withLocation=false,
-    bool withBiometricPopup=false,
-    bool withBiometricLevelHigh=false,
-    bool withSimNumbersAndOperators=false,
-    bool withOtpSpammingFunction=false,
-    bool withAppTamperingFunction=false,
-    bool withSuspiciousAppFunction=false,
-    bool withPromoAbuseFunction=false,
-    List<String> promoIds=const [],
-    bool withAccountTakeoverFunction=false,
-    String userIdentifier='',
+    bool withVpn = false,
+    bool withLocation = false,
+    bool withBiometricPopup = false,
+    bool withBiometricLevelHigh = false,
+    bool withSimNumbersAndOperators = false,
+    bool withOtpSpammingFunction = false,
+    bool withAppTamperingFunction = false,
+    bool withSuspiciousAppFunction = false,
+    bool withPromoAbuseFunction = false,
+    List<String> promoIds = const [],
+    bool withAccountTakeoverFunction = false,
+    String userIdentifier = '',
   }) {
     return FiaPlatform.instance.setFeatures(
       withVpn,
