@@ -4,18 +4,18 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'fia'
-  s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin project.'
+  s.version          = '1.2.0'
+  s.summary          = 'Fazpass Intelligence Authentication for Flutter.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+Flutter plugin bridging the native Fazpass Intelligence Authentication (FIA) SDKs.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://fazpass.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Fazpass' => 'support@fazpass.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'FiaIOS', '~> 1.2.1'
+  s.dependency 'FiaIOS', '~> 1.2.5'
   s.platform = :ios, '14.0'
 
   # Flutter.framework does not contain a i386 slice.

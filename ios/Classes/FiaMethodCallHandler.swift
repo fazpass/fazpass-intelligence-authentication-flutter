@@ -10,35 +10,39 @@ import Flutter
 import FiaIOS
 
 class FiaMethodCallHandler {
-    
+
     private let fia = FIAFactory.getInstance()
-    
+
     var promises: [String:OtpPromise] = [:]
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! [String : Any]
-        
+
         switch call.method {
         case "initialize":
             let merchantKey = arguments["merchantKey"] as! String
             let merchantAppId = arguments["merchantAppId"] as! String
             let groupId = arguments["iosGroupId"] as! String
-            
+
             fia.initialize(merchantKey, merchantAppId, groupId)
             result(nil)
         case "otp":
             let purpose = arguments["purpose"] as! String
             let phone = arguments["phone"] as! String
-            
+            let additionalInfo = arguments["additionalInfo"] as? [String : String]
+            let magicRedirect = parseMagicRedirect(arguments["magicRedirect"] as? String)
+
             let promising: (OtpPromise) -> Void = { promise in
                 self.promises[promise.transactionId] = promise
-                
-                var obj = [:]
+
+                var obj: [String : Any] = [:]
                 obj["transactionId"] = promise.transactionId
+                obj["activityId"] = promise.activityId
                 obj["hasException"] = promise.hasError
                 obj["exception"] = promise.error.localizedDescription
                 obj["digitCount"] = promise.digitCount
-              
+                obj["isBlocked"] = promise.isBlocked
+
                 switch (promise.authType) {
                 case .SMS:
                     obj["authType"] = "SMS"
@@ -59,135 +63,110 @@ class FiaMethodCallHandler {
                 }
                 result(obj)
             }
-            
+
+            let otp = fia.otp()
             switch (purpose) {
             case "login":
-              fia.otp().login(phone, promising)
+                otp.login(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
             case "register":
-              fia.otp().login(phone, promising)
+                otp.register(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
             case "transaction":
-              fia.otp().login(phone, promising)
+                otp.transaction(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
             case "forgetPassword":
-              fia.otp().login(phone, promising)
+                otp.forgetPassword(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
             default:
-              fia.otp().login(phone, promising)
+                result(FlutterError(
+                  code: "UnknownPurpose",
+                  message: "Unknown otp purpose \"\(purpose)\".",
+                  details: nil
+                ))
             }
         case "validateOtp":
-            let transactionId = arguments["transactionId"] as! String
             let otp = arguments["otp"] as! String
-            
-            guard let promise = promises[transactionId] else {
-                  result(FlutterError(
-                    code: "PromiseNotFound",
-                    message: "No such transaction.",
-                    details: nil
-                  ))
-                  return
+
+            withPromise(arguments, result) { promise in
+                promise.validate(
+                  otp,
+                  { err in
+                      result(FlutterError(
+                        code: "ValidateFailed",
+                        message: err.localizedDescription,
+                        details: nil
+                      ))
+                  },
+                  { result(nil) }
+                )
             }
-            promise.validate(
-              otp,
-              { err in
-                  result(FlutterError(
-                    code: "ValidateFailed",
-                    message: err.localizedDescription,
-                    details: nil
-                  ))
-              },
-              { result(nil) }
-            )
         case "validateHE":
-            let transactionId = arguments["transactionId"] as! String
-            
-            guard let promise = promises[transactionId] else {
-                  result(FlutterError(
-                    code: "PromiseNotFound",
-                    message: "No such transaction.",
-                    details: nil
-                  ))
-                  return
+            withPromise(arguments, result) { promise in
+                promise.validateHE(
+                  { err in
+                      result(FlutterError(
+                        code: "ValidateFailed",
+                        message: err.localizedDescription,
+                        details: nil
+                      ))
+                  },
+                  { result(nil) }
+                )
             }
-            promise.validateHE(
-              { err in
-                  result(FlutterError(
-                    code: "ValidateFailed",
-                    message: err.localizedDescription,
-                    details: nil
-                  ))
-              },
-              { result(nil) }
-            )
         case "listenToMiscall":
-            result("")
+            // The native iOS SDK has no miscall listener; the user types the
+            // otp in and it goes through validateOtp instead.
+            result(FlutterError(
+              code: "UnsupportedOnIOS",
+              message: "listenToMiscall is only available on Android.",
+              details: nil
+            ))
         case "launchWhatsappForMagicOtp":
-            let transactionId = arguments["transactionId"] as! String
-            
-            guard let promise = promises[transactionId] else {
-                  result(FlutterError(
-                    code: "PromiseNotFound",
-                    message: "No such transaction.",
-                    details: nil
-                  ))
-                  return
+            withPromise(arguments, result) { promise in
+                promise.launchWhatsappForMagicOtp(
+                  { err in
+                      result(FlutterError(
+                        code: "ValidateFailed",
+                        message: err.localizedDescription,
+                        details: nil
+                      ))
+                  },
+                  { result(nil) }
+                )
             }
-            promise.launchWhatsappForMagicOtp(
-              { err in
-                  result(FlutterError(
-                    code: "ValidateFailed",
-                    message: err.localizedDescription,
-                    details: nil
-                  ))
-              },
-              { result(nil) }
-            )
         case "launchWhatsappForMagicLink":
-            let transactionId = arguments["transactionId"] as! String
-            
-            guard let promise = promises[transactionId] else {
-                  result(FlutterError(
-                    code: "PromiseNotFound",
-                    message: "No such transaction.",
-                    details: nil
-                  ))
-                  return
+            withPromise(arguments, result) { promise in
+                promise.launchWhatsappForMagicLink(
+                  { err in
+                      result(FlutterError(
+                        code: "ValidateFailed",
+                        message: err.localizedDescription,
+                        details: nil
+                      ))
+                  },
+                  { result(nil) }
+                )
             }
-            promise.launchWhatsappForMagicLink(
-              { err in
-                  result(FlutterError(
-                    code: "ValidateFailed",
-                    message: err.localizedDescription,
-                    details: nil
-                  ))
-              },
-              { result(nil) }
-            )
         case "forgetPromise":
             let transactionId = arguments["transactionId"] as! String
-            
+
             promises.removeValue(forKey: transactionId)
             result(nil)
         case "setFeatures":
-            let withVpn = arguments["withVpn"] as? Bool ?? false
             let withLocation = arguments["withLocation"] as? Bool ?? false
             let withBiometricPopup = arguments["withBiometricPopup"] as? Bool ?? false
             let withBiometricLevelHigh = arguments["withBiometricLevelHigh"] as? Bool ?? false
-            let withSimNumbersAndOperators = arguments["withSimNumbersAndOperators"] as? Bool ?? false
-            let withOtpSpammingFunction = arguments["withVpn"] as? Bool ?? false
-            let withAppTamperingFunction = arguments["withAppTamperingFunction"] as? Bool ?? false
-            let withSuspiciousAppFunction = arguments["withSuspiciousAppFunction"] as? Bool ?? false
+            let withOtpSpammingFunction = arguments["withOtpSpammingFunction"] as? Bool ?? false
             let withPromoAbuseFunction = arguments["withPromoAbuseFunction"] as? Bool ?? false
             let promoIds = arguments["promoIds"] as? [String] ?? []
             let withAccountTakeoverFunction = arguments["withAccountTakeoverFunction"] as? Bool ?? false
             let userIdentifier = arguments["userIdentifier"] as? String ?? ""
+            // withVpn, withSimNumbersAndOperators, withAppTamperingFunction and
+            // withSuspiciousAppFunction are android only: DeviceIntelligenceIOS
+            // does not implement them, so they are ignored here.
             fia.setFeatures { $0
-                //.withVpn(withVpn)
                 .withLocation(withLocation)
                 .withBiometricPopup(withBiometricPopup)
                 .withBiometricLevelHigh(withBiometricLevelHigh)
-                //.withSimNumbersAndOperators(withSimNumbersAndOperators)
                 .withOtpSpammingFunction(withOtpSpammingFunction)
-                //.withAppTamperingFunction(withAppTamperingFunction)
-                //.withSuspiciousAppFunction(withSuspiciousAppFunction)
-                //.withPromoAbuseFunction(promoIds = promoIds.toTypedArray(), withPromoAbuseFunction)
+                .withPromoAbuseFunction(promoIds, withPromoAbuseFunction)
                 .withAccountTakeoverFunction(userIdentifier, withAccountTakeoverFunction)
             }
             result(nil)
@@ -195,5 +174,45 @@ class FiaMethodCallHandler {
             result(FlutterMethodNotImplemented)
         }
     }
-    
+
+    func onMagicLink(userActivity: NSUserActivity) {
+        fia.onMagicLink(userActivity: userActivity)
+    }
+
+    func onMagicLink(url: String) {
+        fia.onMagicLink(url: url)
+    }
+
+    // Errors out when the promise is gone, so the dart side never waits
+    // forever on a result that can no longer arrive.
+    private func withPromise(
+        _ arguments: [String : Any],
+        _ result: @escaping FlutterResult,
+        _ block: (OtpPromise) -> Void
+    ) {
+        let transactionId = arguments["transactionId"] as! String
+
+        guard let promise = promises[transactionId] else {
+            result(FlutterError(
+              code: "PromiseNotFound",
+              message: "No such transaction.",
+              details: nil
+            ))
+            return
+        }
+        block(promise)
+    }
+
+    private func parseMagicRedirect(_ name: String?) -> OtpMagicRedirect {
+        switch name {
+        case "WHATSAPP_NORMAL":
+            return .WHATSAPP_NORMAL
+        case "WHATSAPP_BUSINESS":
+            return .WHATSAPP_BUSINESS
+        case "MANUAL":
+            return .MANUAL
+        default:
+            return .AUTO
+        }
+    }
 }

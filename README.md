@@ -28,12 +28,15 @@ import 'package:fia/fia.dart';
 
 ```dart
 import 'package:fia/fia.dart';
+import 'package:fia/otp_auth_type.dart';
+import 'package:fia/otp_magic_redirect.dart';
+import 'package:fia/otp_promise.dart';
 
 // get instance
 final fia = Fia();
 
 // initialize
-fia.initialize("MERCHANT_KEY", "MERCHANT_APP_ID", "IOS_GROUP_ID");
+await fia.initialize("MERCHANT_KEY", "MERCHANT_APP_ID", iosGroupId: "IOS_GROUP_ID");
 
 // request OTP with login purpose
 OtpPromise otpPromise = await fia.otp().login("PHONE");
@@ -83,7 +86,42 @@ try {
 } catch (e) {
     // on error
 }
+
+// release the promise once you are done with it
+await otpPromise.clean();
 ```
+
+### Otp request options
+
+Every otp request (`login`, `register`, `transaction`, `forgetPassword`) takes
+two optional parameters:
+
+```dart
+await fia.otp().login(
+    "PHONE",
+    // attach arbitrary metadata to the request
+    additionalInfo: {"orderId": "12345"},
+    // pick which WhatsApp app the magic otp / magic link auth types open
+    magicRedirect: OtpMagicRedirect.whatsappBusiness,
+);
+```
+
+`magicRedirect` defaults to `OtpMagicRedirect.auto`, which picks WhatsApp or
+WhatsApp Business automatically. Use `OtpMagicRedirect.manual` to let the user
+choose when both are installed.
+
+### Platform differences
+
+| API | Android | iOS |
+|---|---|---|
+| `OtpPromise.listenToMiscall()` | ✅ | ❌ throws — the user types the otp in and you call `validate()` |
+| `setFeatures(withVpn:)` | ✅ | ❌ ignored |
+| `setFeatures(withSimNumbersAndOperators:)` | ✅ | ❌ ignored |
+| `setFeatures(withAppTamperingFunction:)` | ✅ | ❌ ignored |
+| `setFeatures(withSuspiciousAppFunction:)` | ✅ | ❌ ignored |
+
+The ignored flags are not implemented by the native iOS SDK. Every other
+feature flag works on both platforms.
 
 ## License
 

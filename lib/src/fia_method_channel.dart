@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../otp_magic_redirect.dart';
 import 'fia_platform_interface.dart';
 
 /// An implementation of [FiaPlatform] that uses method channels.
@@ -23,10 +24,17 @@ class MethodChannelFia extends FiaPlatform {
   }
 
   @override
-  Future<Map> otp(String purpose, String phone) async {
+  Future<Map> otp(
+    String purpose,
+    String phone,
+    Map<String, String>? additionalInfo,
+    OtpMagicRedirect magicRedirect,
+  ) async {
     return (await methodChannel.invokeMethod<Map>('otp', {
           'purpose': purpose,
           'phone': phone,
+          'additionalInfo': additionalInfo,
+          'magicRedirect': magicRedirect.nativeName,
         })) ??
         {};
   }

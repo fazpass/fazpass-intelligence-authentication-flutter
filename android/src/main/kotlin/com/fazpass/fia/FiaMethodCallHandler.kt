@@ -2,6 +2,7 @@ package com.fazpass.fia
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import com.fazpass.fia.objects.OtpMagicRedirect
 import com.fazpass.fia.objects.OtpPromise
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -38,63 +39,64 @@ internal class FiaMethodCallHandler: MethodCallHandler {
             "otp" -> {
                 val purpose = call.argument<String>("purpose")!!
                 val phone = call.argument<String>("phone")!!
+                val additionalInfo = call.argument<Map<String, String>>("additionalInfo")
+                val magicRedirect = parseMagicRedirect(call.argument<String>("magicRedirect"))
                 val callback = { it: OtpPromise ->
                     promises[it.transactionId] = it
                     result.success(otpPromiseToMap(it))
                 }
+                val otp = fia.otp(currentActivity)
                 when (purpose) {
-                    "login" -> fia.otp(currentActivity).login(phone, callback)
-                    "register" -> fia.otp(currentActivity).register(phone, callback)
-                    "transaction" -> fia.otp(currentActivity).transaction(phone, callback)
-                    "forgetPassword" -> fia.otp(currentActivity).forgetPassword(phone, callback)
+                    "login" ->
+                        if (additionalInfo == null) otp.login(phone, magicRedirect, callback)
+                        else otp.login(phone, additionalInfo, magicRedirect, callback)
+                    "register" ->
+                        if (additionalInfo == null) otp.register(phone, magicRedirect, callback)
+                        else otp.register(phone, additionalInfo, magicRedirect, callback)
+                    "transaction" ->
+                        if (additionalInfo == null) otp.transaction(phone, magicRedirect, callback)
+                        else otp.transaction(phone, additionalInfo, magicRedirect, callback)
+                    "forgetPassword" ->
+                        if (additionalInfo == null) otp.forgetPassword(phone, magicRedirect, callback)
+                        else otp.forgetPassword(phone, additionalInfo, magicRedirect, callback)
+                    else -> result.error(
+                        "UnknownPurpose",
+                        "Unknown otp purpose \"$purpose\".",
+                        null
+                    )
                 }
             }
-            "validateOtp" -> {
-                val transactionId = call.argument<String>("transactionId")!!
+            "validateOtp" -> withPromise(call, result) {
                 val otp = call.argument<String>("otp")!!
-                val promise = promises[transactionId]
-                promise?.let {
-                    it.validate(
-                        otp,
-                        { err -> result.error(err::class.java.name, err.message, null) },
-                        { result.success(null) }
-                    )
-                }
+                it.validate(
+                    otp,
+                    { err -> result.error(err::class.java.name, err.message, null) },
+                    { result.success(null) }
+                )
             }
-            "validateHE" -> {
-                val transactionId = call.argument<String>("transactionId")!!
-                val promise = promises[transactionId]
-                promise?.let {
-                    it.validateHE(
-                        { err -> result.error(err::class.java.name, err.message, null) },
-                        { result.success(null) }
-                    )
-                }
+            "validateHE" -> withPromise(call, result) {
+                it.validateHE(
+                    { err -> result.error(err::class.java.name, err.message, null) },
+                    { result.success(null) }
+                )
             }
-            "listenToMiscall" -> {
-                val transactionId = call.argument<String>("transactionId")!!
-                val promise = promises[transactionId]
-                promise?.let { it.listenToMiscall { otp -> result.success(otp) } }
+            "listenToMiscall" -> withPromise(call, result) {
+                it.listenToMiscall(
+                    { err -> result.error(err::class.java.name, err.message, null) },
+                    { otp -> result.success(otp) }
+                )
             }
-            "launchWhatsappForMagicOtp" -> {
-                val transactionId = call.argument<String>("transactionId")!!
-                val promise = promises[transactionId]
-                promise?.let {
-                    it.launchWhatsappForMagicOtp(
-                        { err -> result.error(err::class.java.name, err.message, null) },
-                        { result.success(null) }
-                    )
-                }
+            "launchWhatsappForMagicOtp" -> withPromise(call, result) {
+                it.launchWhatsappForMagicOtp(
+                    { err -> result.error(err::class.java.name, err.message, null) },
+                    { result.success(null) }
+                )
             }
-            "launchWhatsappForMagicLink" -> {
-                val transactionId = call.argument<String>("transactionId")!!
-                val promise = promises[transactionId]
-                promise?.let {
-                    it.launchWhatsappForMagicLink(
-                        { err -> result.error(err::class.java.name, err.message, null) },
-                        { result.success(null) }
-                    )
-                }
+            "launchWhatsappForMagicLink" -> withPromise(call, result) {
+                it.launchWhatsappForMagicLink(
+                    { err -> result.error(err::class.java.name, err.message, null) },
+                    { result.success(null) }
+                )
             }
             "forgetPromise" -> {
                 val transactionId = call.argument<String>("transactionId")!!
@@ -107,7 +109,7 @@ internal class FiaMethodCallHandler: MethodCallHandler {
                 val withBiometricPopup = call.argument<Boolean>("withBiometricPopup") ?: false
                 val withBiometricLevelHigh = call.argument<Boolean>("withBiometricLevelHigh") ?: false
                 val withSimNumbersAndOperators = call.argument<Boolean>("withSimNumbersAndOperators") ?: false
-                val withOtpSpammingFunction = call.argument<Boolean>("withVpn") ?: false
+                val withOtpSpammingFunction = call.argument<Boolean>("withOtpSpammingFunction") ?: false
                 val withAppTamperingFunction = call.argument<Boolean>("withAppTamperingFunction") ?: false
                 val withSuspiciousAppFunction = call.argument<Boolean>("withSuspiciousAppFunction") ?: false
                 val withPromoAbuseFunction = call.argument<Boolean>("withPromoAbuseFunction") ?: false
@@ -132,12 +134,37 @@ internal class FiaMethodCallHandler: MethodCallHandler {
         }
     }
 
+    // Errors out when the promise is gone, so the dart side never waits
+    // forever on a result that can no longer arrive.
+    private fun withPromise(
+        call: MethodCall,
+        result: MethodChannel.Result,
+        block: (OtpPromise) -> Unit
+    ) {
+        val transactionId = call.argument<String>("transactionId")!!
+        val promise = promises[transactionId]
+        if (promise == null) {
+            result.error("PromiseNotFound", "No such transaction.", null)
+            return
+        }
+        block(promise)
+    }
+
+    private fun parseMagicRedirect(name: String?): OtpMagicRedirect = when (name) {
+        "WHATSAPP_NORMAL" -> OtpMagicRedirect.WHATSAPP_NORMAL
+        "WHATSAPP_BUSINESS" -> OtpMagicRedirect.WHATSAPP_BUSINESS
+        "MANUAL" -> OtpMagicRedirect.MANUAL
+        else -> OtpMagicRedirect.AUTO
+    }
+
     private fun otpPromiseToMap(promise: OtpPromise): HashMap<String, Any> {
         return hashMapOf(
             "transactionId" to promise.transactionId,
+            "activityId" to promise.activityId,
             "hasException" to promise.hasException,
             "exception" to promise.exception.stackTraceToString(),
             "digitCount" to promise.digitCount,
+            "isBlocked" to promise.isBlocked,
             "authType" to promise.authType.name
         )
     }

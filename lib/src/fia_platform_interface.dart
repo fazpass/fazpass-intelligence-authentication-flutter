@@ -1,5 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import '../otp_magic_redirect.dart';
 import 'fia_method_channel.dart';
 
 abstract class FiaPlatform extends PlatformInterface {
@@ -31,7 +32,12 @@ abstract class FiaPlatform extends PlatformInterface {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 
-  Future<Map> otp(String purpose, String phone) {
+  Future<Map> otp(
+    String purpose,
+    String phone,
+    Map<String, String>? additionalInfo,
+    OtpMagicRedirect magicRedirect,
+  ) {
     throw UnimplementedError('otp() has not been implemented.');
   }
 

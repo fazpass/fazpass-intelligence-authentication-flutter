@@ -25,6 +25,10 @@ class Fia {
   }
 
   /// Setup additional pro-feature settings for requesting otp.
+  ///
+  /// [withVpn], [withSimNumbersAndOperators], [withAppTamperingFunction] and
+  /// [withSuspiciousAppFunction] are Android only — the native iOS SDK does not
+  /// implement them, and they are ignored there.
   Future<void> setFeatures({
     bool withVpn = false,
     bool withLocation = false,

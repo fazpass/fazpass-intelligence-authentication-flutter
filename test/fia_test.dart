@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fia/fia.dart';
+import 'package:fia/otp_magic_redirect.dart';
 import 'package:fia/src/fia_platform_interface.dart';
 import 'package:fia/src/fia_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -31,7 +32,12 @@ class MockFiaPlatform with MockPlatformInterfaceMixin implements FiaPlatform {
   }
 
   @override
-  Future<Map> otp(String purpose, String phone) {
+  Future<Map> otp(
+    String purpose,
+    String phone,
+    Map<String, String>? additionalInfo,
+    OtpMagicRedirect magicRedirect,
+  ) {
     // TODO: implement otp
     throw UnimplementedError();
   }
