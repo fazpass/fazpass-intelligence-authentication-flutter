@@ -28,13 +28,34 @@ class MethodChannelFia extends FiaPlatform {
     String purpose,
     String phone,
     Map<String, String>? additionalInfo,
-    OtpMagicRedirect magicRedirect,
   ) async {
     return (await methodChannel.invokeMethod<Map>('otp', {
           'purpose': purpose,
           'phone': phone,
           'additionalInfo': additionalInfo,
-          'magicRedirect': magicRedirect.nativeName,
+        })) ??
+        {};
+  }
+
+  @override
+  Future<Map> otpManual(
+    String purpose,
+    String phone,
+    Map<String, String>? additionalInfo,
+  ) async {
+    return (await methodChannel.invokeMethod<Map>('otpManual', {
+          'purpose': purpose,
+          'phone': phone,
+          'additionalInfo': additionalInfo,
+        })) ??
+        {};
+  }
+
+  @override
+  Future<Map> pickOtpGateway(String gatewayId, int number) async {
+    return (await methodChannel.invokeMethod<Map>('pickOtpGateway', {
+          'gatewayId': gatewayId,
+          'number': number,
         })) ??
         {};
   }
@@ -63,16 +84,24 @@ class MethodChannelFia extends FiaPlatform {
   }
 
   @override
-  Future<void> launchWhatsappForMagicOtp(String transactionId) {
+  Future<void> launchWhatsappForMagicOtp(
+    String transactionId,
+    OtpMagicRedirect magicRedirect,
+  ) {
     return methodChannel.invokeMethod<void>('launchWhatsappForMagicOtp', {
       'transactionId': transactionId,
+      'magicRedirect': magicRedirect.nativeName,
     });
   }
 
   @override
-  Future<void> launchWhatsappForMagicLink(String transactionId) {
+  Future<void> launchWhatsappForMagicLink(
+    String transactionId,
+    OtpMagicRedirect magicRedirect,
+  ) {
     return methodChannel.invokeMethod<void>('launchWhatsappForMagicLink', {
       'transactionId': transactionId,
+      'magicRedirect': magicRedirect.nativeName,
     });
   }
 
@@ -80,6 +109,13 @@ class MethodChannelFia extends FiaPlatform {
   Future<void> forgetPromise(String transactionId) {
     return methodChannel.invokeMethod<void>('forgetPromise', {
       'transactionId': transactionId,
+    });
+  }
+
+  @override
+  Future<void> forgetGatewayPromise(String gatewayId) {
+    return methodChannel.invokeMethod<void>('forgetGatewayPromise', {
+      'gatewayId': gatewayId,
     });
   }
 

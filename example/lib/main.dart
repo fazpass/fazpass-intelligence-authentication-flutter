@@ -1,3 +1,4 @@
+import 'package:fia_example/pages/gateway_page.dart';
 import 'package:fia_example/pages/home_page.dart';
 import 'package:fia_example/pages/login_page.dart';
 import 'package:fia_example/pages/validate_page.dart';
@@ -21,6 +22,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => LoginPage(),
+        '/gateway': (context) => GatewayPage(),
         '/validate': (context) => ValidatePage(),
         '/home': (context) => HomePage(),
       },

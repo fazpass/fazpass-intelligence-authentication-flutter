@@ -27,6 +27,18 @@ class _ValidatePageState extends State<ValidatePage> {
           spacing: 24,
           children: [
             Text('validate otp type: $authType', textAlign: TextAlign.center),
+            // Magic otp and magic link both start by sending the user to
+            // WhatsApp. Magic otp then comes back with an otp to type in,
+            // magic link validates itself once the user taps the link.
+            if (authType == OtpAuthType.magicOtp ||
+                authType == OtpAuthType.magicLink)
+              ElevatedButton(
+                onPressed:
+                    authType == OtpAuthType.magicOtp
+                        ? _launchWhatsappForMagicOtp
+                        : _launchWhatsappForMagicLink,
+                child: const Text('Open Whatsapp'),
+              ),
             if ([
               OtpAuthType.sms,
               OtpAuthType.whatsapp,
@@ -41,19 +53,20 @@ class _ValidatePageState extends State<ValidatePage> {
                   hintText: '1234',
                 ),
               ),
-            ElevatedButton(
-              onPressed: () {
-                switch (authType) {
-                  case OtpAuthType.he:
-                    _validateHe();
-                    break;
-                  default:
-                    _validateOtp();
-                    break;
-                }
-              },
-              child: const Text('Validate OTP'),
-            ),
+            if (authType != OtpAuthType.magicLink)
+              ElevatedButton(
+                onPressed: () {
+                  switch (authType) {
+                    case OtpAuthType.he:
+                      _validateHe();
+                      break;
+                    default:
+                      _validateOtp();
+                      break;
+                  }
+                },
+                child: const Text('Validate OTP'),
+              ),
           ],
         ),
       ),
@@ -66,25 +79,7 @@ class _ValidatePageState extends State<ValidatePage> {
       if (!mounted) return;
       Navigator.pushNamed(context, '/home');
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder:
-            (c) => AlertDialog(
-              title: Text('Error'),
-              content: Text('$e'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(c),
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-      );
+      _showError(e);
     }
   }
 
@@ -94,25 +89,44 @@ class _ValidatePageState extends State<ValidatePage> {
       if (!mounted) return;
       Navigator.pushNamed(context, '/home');
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder:
-            (c) => AlertDialog(
-              title: Text('Error'),
-              content: Text('$e'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(c),
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-      );
+      _showError(e);
     }
+  }
+
+  void _launchWhatsappForMagicOtp() async {
+    try {
+      await _fiaService.launchWhatsappForMagicOtp();
+    } catch (e) {
+      _showError(e);
+    }
+  }
+
+  void _launchWhatsappForMagicLink() async {
+    try {
+      await _fiaService.launchWhatsappForMagicLink();
+      if (!mounted) return;
+      Navigator.pushNamed(context, '/home');
+    } catch (e) {
+      _showError(e);
+    }
+  }
+
+  void _showError(Object e) {
+    if (kDebugMode) {
+      print(e);
+    }
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (c) => AlertDialog(
+            title: Text('Error'),
+            content: Text('$e'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(c), child: Text('OK')),
+            ],
+          ),
+    );
   }
 }

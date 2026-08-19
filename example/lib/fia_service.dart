@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:fia/fia.dart';
+import 'package:fia/otp_gateway_promise.dart';
+import 'package:fia/otp_magic_redirect.dart';
 import 'package:fia/otp_promise.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,6 +17,7 @@ class FiaService {
 
   final _fia = Fia();
   OtpPromise? lastPromise;
+  OtpGatewayPromise? lastGatewayPromise;
   String? phone;
 
   void initialize() {
@@ -34,6 +37,56 @@ class FiaService {
     this.phone = phone;
   }
 
+  /// Asks for every auth type available for [phone] so the user can pick one.
+  ///
+  /// Returns true when the user was already authenticated and no otp is needed.
+  Future<bool> requestOtpManual(String phone) async {
+    final promise = await _fia.otpManual().register(phone);
+    if (promise.hasException) {
+      throw promise.exception!;
+    }
+    lastGatewayPromise = promise;
+    this.phone = phone;
+
+    if (promise.isAuthenticated) {
+      final status = await checkVerificationStatus(promise.transactionId);
+      await promise.clean();
+      lastGatewayPromise = null;
+      if (!status) throw 'Failed to verify user.';
+      return true;
+    }
+    return false;
+  }
+
+  /// Requests an otp through the auth type the user picked.
+  Future<void> pickGateway(int number) async {
+    final gatewayPromise = lastGatewayPromise;
+    if (gatewayPromise == null) throw 'No gateway promise.';
+
+    final promise = await gatewayPromise.pick(number);
+    if (promise.hasException) {
+      throw promise.exception!;
+    }
+    lastPromise = promise;
+    await gatewayPromise.clean();
+    lastGatewayPromise = null;
+  }
+
+  Future<void> launchWhatsappForMagicOtp() async {
+    await lastPromise?.launchWhatsappForMagicOtp(
+      magicRedirect: OtpMagicRedirect.auto,
+    );
+  }
+
+  Future<void> launchWhatsappForMagicLink() async {
+    await lastPromise?.launchWhatsappForMagicLink(
+      magicRedirect: OtpMagicRedirect.auto,
+    );
+    final status = await checkVerificationStatus();
+    await lastPromise?.clean();
+    if (!status) throw 'Failed to verify user.';
+  }
+
   Future<void> validateOtp(String otp) async {
     await lastPromise?.validate(otp);
     final status = await checkVerificationStatus();
@@ -48,10 +101,11 @@ class FiaService {
     if (!status) throw 'Failed to verify user.';
   }
 
-  Future<bool> checkVerificationStatus() async {
+  Future<bool> checkVerificationStatus([String? transactionId]) async {
+    final id = transactionId ?? lastPromise?.transactionId;
     final response = await http.get(
       Uri.parse(
-        'https://api.fazpass.com/v1/otp/fia/verification-status/${lastPromise?.transactionId}',
+        'https://api.fazpass.com/v1/otp/fia/verification-status/$id',
       ),
       headers: {
         'Content-Type': 'application/json',

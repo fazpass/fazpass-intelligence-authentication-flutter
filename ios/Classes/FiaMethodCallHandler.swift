@@ -15,6 +15,10 @@ class FiaMethodCallHandler {
 
     var promises: [String:OtpPromise] = [:]
 
+    // A gateway promise has no transaction id until the user is authenticated,
+    // so it gets a synthetic handle instead.
+    var gatewayPromises: [String:OtpGatewayPromise] = [:]
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! [String : Any]
 
@@ -30,56 +34,65 @@ class FiaMethodCallHandler {
             let purpose = arguments["purpose"] as! String
             let phone = arguments["phone"] as! String
             let additionalInfo = arguments["additionalInfo"] as? [String : String]
-            let magicRedirect = parseMagicRedirect(arguments["magicRedirect"] as? String)
 
             let promising: (OtpPromise) -> Void = { promise in
                 self.promises[promise.transactionId] = promise
-
-                var obj: [String : Any] = [:]
-                obj["transactionId"] = promise.transactionId
-                obj["activityId"] = promise.activityId
-                obj["hasException"] = promise.hasError
-                obj["exception"] = promise.error.localizedDescription
-                obj["digitCount"] = promise.digitCount
-                obj["isBlocked"] = promise.isBlocked
-
-                switch (promise.authType) {
-                case .SMS:
-                    obj["authType"] = "SMS"
-                case .Whatsapp:
-                    obj["authType"] = "Whatsapp"
-                case .Miscall:
-                    obj["authType"] = "Miscall"
-                case .HE:
-                    obj["authType"] = "HE"
-                case .MagicOtp:
-                    obj["authType"] = "MagicOtp"
-                case .MagicLink:
-                    obj["authType"] = "MagicLink"
-                case .Voice:
-                    obj["authType"] = "Voice"
-                @unknown default:
-                    obj["authType"] = "HE"
-                }
-                result(obj)
+                result(self.otpPromiseToMap(promise))
             }
 
             let otp = fia.otp()
             switch (purpose) {
             case "login":
-                otp.login(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
+                otp.login(phone, additionalInfo: additionalInfo, promising)
             case "register":
-                otp.register(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
+                otp.register(phone, additionalInfo: additionalInfo, promising)
             case "transaction":
-                otp.transaction(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
+                otp.transaction(phone, additionalInfo: additionalInfo, promising)
             case "forgetPassword":
-                otp.forgetPassword(phone, additionalInfo: additionalInfo, redirect: magicRedirect, promising)
+                otp.forgetPassword(phone, additionalInfo: additionalInfo, promising)
             default:
                 result(FlutterError(
                   code: "UnknownPurpose",
                   message: "Unknown otp purpose \"\(purpose)\".",
                   details: nil
                 ))
+            }
+        case "otpManual":
+            let purpose = arguments["purpose"] as! String
+            let phone = arguments["phone"] as! String
+            let additionalInfo = arguments["additionalInfo"] as? [String : String]
+
+            let promising: (OtpGatewayPromise) -> Void = { promise in
+                let gatewayId = UUID().uuidString
+                self.gatewayPromises[gatewayId] = promise
+                result(self.otpGatewayPromiseToMap(gatewayId, promise))
+            }
+
+            let otp = fia.otpManual()
+            switch (purpose) {
+            case "login":
+                otp.login(phone, additionalInfo: additionalInfo, promising)
+            case "register":
+                otp.register(phone, additionalInfo: additionalInfo, promising)
+            case "transaction":
+                otp.transaction(phone, additionalInfo: additionalInfo, promising)
+            case "forgetPassword":
+                otp.forgetPassword(phone, additionalInfo: additionalInfo, promising)
+            default:
+                result(FlutterError(
+                  code: "UnknownPurpose",
+                  message: "Unknown otp purpose \"\(purpose)\".",
+                  details: nil
+                ))
+            }
+        case "pickOtpGateway":
+            let number = arguments["number"] as! Int
+
+            withGatewayPromise(arguments, result) { promise in
+                promise.pick(number) { picked in
+                    self.promises[picked.transactionId] = picked
+                    result(self.otpPromiseToMap(picked))
+                }
             }
         case "validateOtp":
             let otp = arguments["otp"] as! String
@@ -119,8 +132,11 @@ class FiaMethodCallHandler {
               details: nil
             ))
         case "launchWhatsappForMagicOtp":
+            let magicRedirect = parseMagicRedirect(arguments["magicRedirect"] as? String)
+
             withPromise(arguments, result) { promise in
                 promise.launchWhatsappForMagicOtp(
+                  magicRedirect,
                   { err in
                       result(FlutterError(
                         code: "ValidateFailed",
@@ -132,8 +148,11 @@ class FiaMethodCallHandler {
                 )
             }
         case "launchWhatsappForMagicLink":
+            let magicRedirect = parseMagicRedirect(arguments["magicRedirect"] as? String)
+
             withPromise(arguments, result) { promise in
                 promise.launchWhatsappForMagicLink(
+                  magicRedirect,
                   { err in
                       result(FlutterError(
                         code: "ValidateFailed",
@@ -148,6 +167,11 @@ class FiaMethodCallHandler {
             let transactionId = arguments["transactionId"] as! String
 
             promises.removeValue(forKey: transactionId)
+            result(nil)
+        case "forgetGatewayPromise":
+            let gatewayId = arguments["gatewayId"] as! String
+
+            gatewayPromises.removeValue(forKey: gatewayId)
             result(nil)
         case "setFeatures":
             let withLocation = arguments["withLocation"] as? Bool ?? false
@@ -201,6 +225,73 @@ class FiaMethodCallHandler {
             return
         }
         block(promise)
+    }
+
+    // Same as withPromise, but for the manual flow's gateway promises.
+    private func withGatewayPromise(
+        _ arguments: [String : Any],
+        _ result: @escaping FlutterResult,
+        _ block: (OtpGatewayPromise) -> Void
+    ) {
+        let gatewayId = arguments["gatewayId"] as! String
+
+        guard let promise = gatewayPromises[gatewayId] else {
+            result(FlutterError(
+              code: "GatewayPromiseNotFound",
+              message: "No such gateway promise.",
+              details: nil
+            ))
+            return
+        }
+        block(promise)
+    }
+
+    private func otpPromiseToMap(_ promise: OtpPromise) -> [String : Any] {
+        var obj: [String : Any] = [:]
+        obj["transactionId"] = promise.transactionId
+        obj["activityId"] = promise.activityId
+        obj["hasException"] = promise.hasError
+        obj["exception"] = promise.error.localizedDescription
+        obj["digitCount"] = promise.digitCount
+        obj["isBlocked"] = promise.isBlocked
+
+        switch (promise.authType) {
+        case .SMS:
+            obj["authType"] = "SMS"
+        case .Whatsapp:
+            obj["authType"] = "Whatsapp"
+        case .Miscall:
+            obj["authType"] = "Miscall"
+        case .HE:
+            obj["authType"] = "HE"
+        case .MagicOtp:
+            obj["authType"] = "MagicOtp"
+        case .MagicLink:
+            obj["authType"] = "MagicLink"
+        case .Voice:
+            obj["authType"] = "Voice"
+        @unknown default:
+            obj["authType"] = "HE"
+        }
+        return obj
+    }
+
+    private func otpGatewayPromiseToMap(
+        _ gatewayId: String,
+        _ promise: OtpGatewayPromise
+    ) -> [String : Any] {
+        var obj: [String : Any] = [:]
+        obj["gatewayId"] = gatewayId
+        obj["isAuthenticated"] = promise.isAuthenticated
+        obj["transactionId"] = promise.transactionId
+        obj["activityId"] = promise.activityId
+        obj["isBlocked"] = promise.isBlocked
+        obj["hasException"] = promise.hasError
+        obj["exception"] = promise.error.localizedDescription
+        obj["gateways"] = promise.gateways.map {
+            ["number": $0.number, "name": $0.name] as [String : Any]
+        }
+        return obj
     }
 
     private func parseMagicRedirect(_ name: String?) -> OtpMagicRedirect {

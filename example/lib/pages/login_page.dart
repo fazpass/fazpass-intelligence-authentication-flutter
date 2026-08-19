@@ -15,6 +15,9 @@ class LoginPageState extends State<LoginPage> {
   final _fiaService = FiaService();
   final _phoneController = TextEditingController();
 
+  /// Whether to let the user pick the auth type instead of the server.
+  var _manual = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,14 +42,32 @@ class LoginPageState extends State<LoginPage> {
                 hintText: '+6281234567890',
               ),
             ),
+            SwitchListTile(
+              value: _manual,
+              onChanged: (value) => setState(() => _manual = value),
+              title: const Text('Let me pick the auth type'),
+              contentPadding: EdgeInsets.zero,
+            ),
             ElevatedButton(
-              onPressed: _requestOtp,
+              onPressed: _manual ? _requestOtpManual : _requestOtp,
               child: const Text('Request Otp'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _requestOtpManual() async {
+    final phone = _phoneController.text.toString();
+    try {
+      final isAuthenticated = await _fiaService.requestOtpManual(phone);
+      if (!mounted) return;
+      // Already authenticated: no otp needed, skip straight past validation.
+      Navigator.pushNamed(context, isAuthenticated ? '/home' : '/gateway');
+    } catch (e) {
+      _showError(e);
+    }
   }
 
   void _requestOtp() async {
@@ -56,25 +77,26 @@ class LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       Navigator.pushNamed(context, '/validate');
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder:
-            (c) => AlertDialog(
-              title: Text('Error'),
-              content: Text('$e'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(c),
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-      );
+      _showError(e);
     }
+  }
+
+  void _showError(Object e) {
+    if (kDebugMode) {
+      print(e);
+    }
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (c) => AlertDialog(
+            title: Text('Error'),
+            content: Text('$e'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(c), child: Text('OK')),
+            ],
+          ),
+    );
   }
 }

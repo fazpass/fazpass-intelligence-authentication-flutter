@@ -36,9 +36,20 @@ abstract class FiaPlatform extends PlatformInterface {
     String purpose,
     String phone,
     Map<String, String>? additionalInfo,
-    OtpMagicRedirect magicRedirect,
   ) {
     throw UnimplementedError('otp() has not been implemented.');
+  }
+
+  Future<Map> otpManual(
+    String purpose,
+    String phone,
+    Map<String, String>? additionalInfo,
+  ) {
+    throw UnimplementedError('otpManual() has not been implemented.');
+  }
+
+  Future<Map> pickOtpGateway(String gatewayId, int number) {
+    throw UnimplementedError('pickOtpGateway() has not been implemented.');
   }
 
   Future<void> validateOtp(String transactionId, String otp) {
@@ -53,13 +64,19 @@ abstract class FiaPlatform extends PlatformInterface {
     throw UnimplementedError('listenToMiscall() has not been implemented.');
   }
 
-  Future<void> launchWhatsappForMagicOtp(String transactionId) {
+  Future<void> launchWhatsappForMagicOtp(
+    String transactionId,
+    OtpMagicRedirect magicRedirect,
+  ) {
     throw UnimplementedError(
       'launchWhatsappForMagicOtp() has not been implemented.',
     );
   }
 
-  Future<void> launchWhatsappForMagicLink(String transactionId) {
+  Future<void> launchWhatsappForMagicLink(
+    String transactionId,
+    OtpMagicRedirect magicRedirect,
+  ) {
     throw UnimplementedError(
       'launchWhatsappForMagicLink() has not been implemented.',
     );
@@ -67,6 +84,10 @@ abstract class FiaPlatform extends PlatformInterface {
 
   Future<void> forgetPromise(String transactionId) {
     throw UnimplementedError('forgetPromise() has not been implemented.');
+  }
+
+  Future<void> forgetGatewayPromise(String gatewayId) {
+    throw UnimplementedError('forgetGatewayPromise() has not been implemented.');
   }
 
   Future<void> setFeatures(

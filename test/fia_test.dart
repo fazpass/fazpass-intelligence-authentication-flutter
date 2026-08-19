@@ -36,9 +36,30 @@ class MockFiaPlatform with MockPlatformInterfaceMixin implements FiaPlatform {
     String purpose,
     String phone,
     Map<String, String>? additionalInfo,
-    OtpMagicRedirect magicRedirect,
   ) {
     // TODO: implement otp
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map> otpManual(
+    String purpose,
+    String phone,
+    Map<String, String>? additionalInfo,
+  ) {
+    // TODO: implement otpManual
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map> pickOtpGateway(String gatewayId, int number) {
+    // TODO: implement pickOtpGateway
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> forgetGatewayPromise(String gatewayId) {
+    // TODO: implement forgetGatewayPromise
     throw UnimplementedError();
   }
 
@@ -55,13 +76,19 @@ class MockFiaPlatform with MockPlatformInterfaceMixin implements FiaPlatform {
   }
 
   @override
-  Future<void> launchWhatsappForMagicLink(String transactionId) {
+  Future<void> launchWhatsappForMagicLink(
+    String transactionId,
+    OtpMagicRedirect magicRedirect,
+  ) {
     // TODO: implement launchWhatsappForMagicLink
     throw UnimplementedError();
   }
 
   @override
-  Future<void> launchWhatsappForMagicOtp(String transactionId) {
+  Future<void> launchWhatsappForMagicOtp(
+    String transactionId,
+    OtpMagicRedirect magicRedirect,
+  ) {
     // TODO: implement launchWhatsappForMagicOtp
     throw UnimplementedError();
   }

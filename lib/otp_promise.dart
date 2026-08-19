@@ -1,5 +1,6 @@
 import 'src/fia_platform_interface.dart';
 import 'otp_auth_type.dart';
+import 'otp_magic_redirect.dart';
 
 class OtpPromise {
   String transactionId;
@@ -66,12 +67,29 @@ class OtpPromise {
     return FiaPlatform.instance.listenToMiscall(transactionId);
   }
 
-  Future<void> launchWhatsappForMagicOtp() {
-    return FiaPlatform.instance.launchWhatsappForMagicOtp(transactionId);
+  /// Opens WhatsApp so the user can send the prepared message, then completes.
+  ///
+  /// [magicRedirect] picks which WhatsApp app is opened.
+  Future<void> launchWhatsappForMagicOtp({
+    OtpMagicRedirect magicRedirect = OtpMagicRedirect.auto,
+  }) {
+    return FiaPlatform.instance.launchWhatsappForMagicOtp(
+      transactionId,
+      magicRedirect,
+    );
   }
 
-  Future<void> launchWhatsappForMagicLink() {
-    return FiaPlatform.instance.launchWhatsappForMagicLink(transactionId);
+  /// Opens WhatsApp so the user can send the prepared message, then completes
+  /// once the user has tapped the incoming link and been validated.
+  ///
+  /// [magicRedirect] picks which WhatsApp app is opened.
+  Future<void> launchWhatsappForMagicLink({
+    OtpMagicRedirect magicRedirect = OtpMagicRedirect.auto,
+  }) {
+    return FiaPlatform.instance.launchWhatsappForMagicLink(
+      transactionId,
+      magicRedirect,
+    );
   }
 
   /// Clean this object from memory.

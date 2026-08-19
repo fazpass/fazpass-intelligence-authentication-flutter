@@ -94,21 +94,72 @@ await otpPromise.clean();
 ### Otp request options
 
 Every otp request (`login`, `register`, `transaction`, `forgetPassword`) takes
-two optional parameters:
+an optional `additionalInfo` parameter for attaching arbitrary metadata:
 
 ```dart
-await fia.otp().login(
-    "PHONE",
-    // attach arbitrary metadata to the request
-    additionalInfo: {"orderId": "12345"},
-    // pick which WhatsApp app the magic otp / magic link auth types open
+await fia.otp().login("PHONE", additionalInfo: {"orderId": "12345"});
+```
+
+### Magic otp and magic link
+
+Both auth types start by sending the user to WhatsApp to post a prepared
+message. Magic otp then comes back with an otp you validate as usual; magic
+link validates itself once the user taps the incoming link.
+
+```dart
+// magic otp: opens WhatsApp, then you collect and validate the otp
+await otpPromise.launchWhatsappForMagicOtp();
+await otpPromise.validate("OTP");
+
+// magic link: completes once the user has tapped the link
+await otpPromise.launchWhatsappForMagicLink();
+```
+
+Both take an optional `magicRedirect` to pick which WhatsApp app is opened:
+
+```dart
+await otpPromise.launchWhatsappForMagicOtp(
     magicRedirect: OtpMagicRedirect.whatsappBusiness,
 );
 ```
 
-`magicRedirect` defaults to `OtpMagicRedirect.auto`, which picks WhatsApp or
-WhatsApp Business automatically. Use `OtpMagicRedirect.manual` to let the user
-choose when both are installed.
+It defaults to `OtpMagicRedirect.auto`, which picks WhatsApp or WhatsApp
+Business automatically. Use `OtpMagicRedirect.manual` to let the user choose
+when both are installed.
+
+### Request otp with a user-preferred auth type
+
+`otpManual()` returns every auth type available for the phone number so the
+user can pick one, instead of letting the server decide.
+
+```dart
+import 'package:fia/otp_gateway_promise.dart';
+
+OtpGatewayPromise gatewayPromise = await fia.otpManual().login("PHONE");
+if (gatewayPromise.hasException) {
+    final exception = gatewayPromise.exception;
+    // handle exception here
+    return;
+}
+
+if (gatewayPromise.isAuthenticated) {
+    // the user is already authenticated and needs no otp — the flow ends here,
+    // take gatewayPromise.transactionId and check the verified status
+    return;
+}
+
+// show gatewayPromise.gateways to the user, then request the otp through the
+// one they picked. The result is the same OtpPromise the automatic flow gives.
+final gateway = gatewayPromise.gateways[SELECTED_INDEX];
+OtpPromise otpPromise = await gatewayPromise.pick(gateway.number);
+
+// release the gateway promise once you are done with it
+await gatewayPromise.clean();
+```
+
+Each `OtpGateway` has a `number` (the identifier you pass to `pick`) and a
+`name` (what to show the user). From here the flow is identical to the
+automatic one: switch on `otpPromise.authType` and validate.
 
 ### Platform differences
 

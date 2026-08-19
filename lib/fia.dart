@@ -1,4 +1,5 @@
 import 'otp_settings.dart';
+import 'otp_user_settings.dart';
 import 'src/fia_platform_interface.dart';
 
 class Fia {
@@ -22,6 +23,15 @@ class Fia {
   /// It can request an otp which you have to validate by yourself.
   OtpSettings otp() {
     return OtpSettings();
+  }
+
+  /// Creates an instance of `OtpUserSettings`.
+  ///
+  /// Unlike [otp], which lets the server decide which auth type to use, this
+  /// first returns every auth type available for the phone number so the user
+  /// can pick the one they prefer.
+  OtpUserSettings otpManual() {
+    return OtpUserSettings();
   }
 
   /// Setup additional pro-feature settings for requesting otp.
