@@ -4,6 +4,7 @@ import 'package:fia/fia.dart';
 import 'package:fia/otp_gateway_promise.dart';
 import 'package:fia/otp_magic_redirect.dart';
 import 'package:fia/otp_promise.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class FiaService {
@@ -13,7 +14,8 @@ class FiaService {
     return _instance;
   }
 
-  final config = _FiaConfig.production;
+  // Lazy: the credentials are only readable once dotenv has loaded in main().
+  late final config = _FiaConfig.fromEnv();
 
   final _fia = Fia();
   OtpPromise? lastPromise;
@@ -122,14 +124,26 @@ class FiaService {
   }
 }
 
-enum _FiaConfig {
-  production(
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjo5NzcwfQ.RTOdNJK-P3iKnVOP8m_xnCet7OcuG5GETdYlPM0FIpo',
-    '2e814399-6120-4a5e-93e2-562a903d480d',
+/// The merchant credentials, read from the untracked .env file.
+class _FiaConfig {
+  _FiaConfig._(this.merchantKey, this.merchantAppId);
+
+  factory _FiaConfig.fromEnv() => _FiaConfig._(
+    _read('FIA_MERCHANT_KEY'),
+    _read('FIA_MERCHANT_APP_ID'),
   );
 
   final String merchantKey;
   final String merchantAppId;
 
-  const _FiaConfig(this.merchantKey, this.merchantAppId);
+  static String _read(String key) {
+    final value = dotenv.env[key];
+    if (value == null || value.isEmpty) {
+      throw StateError(
+        'Missing $key. Copy example/.env.example to example/.env and fill in '
+        'your merchant credentials.',
+      );
+    }
+    return value;
+  }
 }

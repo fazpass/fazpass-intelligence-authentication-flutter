@@ -3,8 +3,13 @@ import 'package:fia_example/pages/home_page.dart';
 import 'package:fia_example/pages/login_page.dart';
 import 'package:fia_example/pages/validate_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  // dotenv reads the .env asset through the root bundle, so the binding has
+  // to be up before the credentials are available.
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
