@@ -2,7 +2,7 @@
 
 ## 1.3.0
 
-Wraps native FIA android 1.3.0 and ios 1.3.0.
+Wraps native FIA android 1.3.0 and ios 1.3.1.
 
 * **Breaking:** `magicRedirect` moved off the otp requests and onto
   `OtpPromise.launchWhatsappForMagicOtp()` and
